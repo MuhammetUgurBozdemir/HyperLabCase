@@ -33,7 +33,7 @@ namespace Game.Scripts.LevelDesign
             {
                 for (int j = 0; j < length; j++)
                 {
-                    var obj = Instantiate(prefab, new Vector3(i - length / 2, 0, j), quaternion.identity,
+                    var obj = Instantiate(prefab, new Vector3(i - length / 2, 0, j), Quaternion.identity,
                         this.transform);
                     levelDesignGrids.Add(obj.GetComponent<LevelDesignGrid>());
                 }
@@ -50,13 +50,15 @@ namespace Game.Scripts.LevelDesign
                 GridData grid = new GridData
                 {
                     blockAmount = levelDesignGrid.objects.Count,
-                    blockColor = levelDesignGrid.color
+                    blockColor = levelDesignGrid.color,
+                    pos = levelDesignGrid.transform.position
                 };
                 data.levelGrids.Add(grid);
             }
 
 
             string fileName = "Level" + (Directory.GetFiles(Application.dataPath + "/Game/Levels/", "*.json").Length+1);
+            
             string levelJson = JsonUtility.ToJson(data);
             File.WriteAllText(Application.dataPath + "/Game/Levels/" + fileName + ".json", levelJson);
         }

@@ -8,6 +8,7 @@ namespace Game.Scripts.Block
         private MaterialPropertyBlock _materialPropertyBlock;
         private static readonly int Color1 = Shader.PropertyToID("_Color");
 
+       
         public void ApplyColor(Color color)
         {
             _materialPropertyBlock ??= new MaterialPropertyBlock();
