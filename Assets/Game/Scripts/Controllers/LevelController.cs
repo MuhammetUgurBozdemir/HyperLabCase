@@ -18,6 +18,7 @@ namespace Game.Scripts.Controllers
         private int currentLevel;
         private LevelData _levelData;
 
+        public bool isMoving = false;
         readonly Vector2[] _neighborOffsets = new Vector2[]
         {
             new Vector2(1, 0),
@@ -61,6 +62,8 @@ namespace Game.Scripts.Controllers
 
         public void CheckGridsForMatchedColor(GridView view, Color color)
         {
+            if(isMoving) return;
+            
             _counter = 0;
             
             foreach (var offset in _neighborOffsets)
@@ -69,12 +72,14 @@ namespace Game.Scripts.Controllers
 
                 if (!_gridDictionary.TryGetValue(neighborPos, out GridView neighborGrid)) continue;
 
+                if (neighborGrid.BlockViews.Count <= 0) continue;
+                
                 view.BlockViews.AddRange(neighborGrid.BlockViews);
-                neighborGrid.BlockViews.Clear();
-
                 _counter++;
             }
 
+            if(_counter==0) return;
+            
             view.StartCoroutineFromController();
         }
 

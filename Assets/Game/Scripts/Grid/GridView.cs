@@ -20,13 +20,15 @@ namespace Game.Scripts.Grid
         private DiContainer _diContainer;
         private PrefabSettings _prefabSettings;
         private LevelController _levelController;
+        private BlockView.Factory _factory;
 
         [Inject]
-        private void Construct(DiContainer diContainer, PrefabSettings prefabSettings, LevelController levelController)
+        private void Construct(DiContainer diContainer, PrefabSettings prefabSettings, LevelController levelController,BlockView.Factory factory)
         {
             _diContainer = diContainer;
             _prefabSettings = prefabSettings;
             _levelController = levelController;
+            _factory = factory;
         }
 
         public void Init(GridData data , bool isSpawned=false)
@@ -38,10 +40,11 @@ namespace Game.Scripts.Grid
 
             for (int i = 0; i < data.blockAmount; i++)
             {
-                BlockView view = _diContainer.InstantiatePrefabForComponent<BlockView>(_prefabSettings.blockView);
+                BlockView view = _factory.Create(new BlockView.Args(data,BlockViews));
+                
                 view.transform.SetParent(transform);
                 BlockViews.Add(view);
-                view.ApplyColor(data);
+                view.ApplyColor(data,BlockViews);
                 
                 Vector3 newPosition = new Vector3(_data.pos.x, .15f * (i + 1), data.pos.y);
 
@@ -49,7 +52,7 @@ namespace Game.Scripts.Grid
                 {
                     newPosition.y += 10;
                     view.transform.position = newPosition;
-                    view.transform.DOMove(new Vector3(_data.pos.x, .15f * (i + 1)), 0.5f);
+                    view.transform.DOMove(new Vector3(_data.pos.x, .15f * (i + 1)), 0.5f).SetEase(Ease.InSine);
                 }
                 else
                 {
@@ -68,6 +71,11 @@ namespace Game.Scripts.Grid
             var views = GroupAndSortColorObjects(BlockViews);
             var yPos = .15f;
 
+            if (views.Any())
+            {
+                _levelController.isMoving = true;
+            }
+            
             foreach (var blockViews in views)
             {
                 var groupedList = blockViews
@@ -89,6 +97,9 @@ namespace Game.Scripts.Grid
                             .SetEase(Ease.InSine);
 
                         yPos += .15f;
+
+                        blockView.parentList.Remove(blockView);
+                        blockView.parentList = BlockViews;
                         
                         yield return new WaitForSeconds(.10f);
                     }
@@ -108,9 +119,11 @@ namespace Game.Scripts.Grid
             foreach (var blockView in largeGroups)
             {
                 BlockViews.Remove(blockView);
-                blockView.DestroyView();
+                blockView.DespawnView();
                 yield return new  WaitForSeconds(.1f);
             }
+
+            _levelController.isMoving = false;
         }
 
         private IOrderedEnumerable<IGrouping<Color, BlockView>> GroupAndSortColorObjects(List<BlockView> matchedObjects)
@@ -131,5 +144,7 @@ namespace Game.Scripts.Grid
         {
             Destroy(gameObject);
         }
+        
+       
     }
 }

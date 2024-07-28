@@ -38,7 +38,7 @@ namespace Game.Scripts.LevelDesign
                 obj.GetComponent<BlockView>().ApplyColor(new GridData
                 {
                     blockColor = color
-                });
+                },new List<BlockView>());
                 objects.Add(obj.GetComponent<BlockView>());
                 _yPos += .15f;
             }

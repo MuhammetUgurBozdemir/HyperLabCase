@@ -1,5 +1,7 @@
 
+using Game.Scripts.Block;
 using Game.Scripts.Controllers;
+using Game.Scripts.Grid;
 using Game.Scripts.Settings;
 using Zenject;
 
@@ -23,18 +25,20 @@ namespace Game.Scripts.Installers
         public override void InstallBindings()
         {
             Container.BindInterfacesAndSelfTo<LevelController>().AsSingle();
+            
+            InstallProducts();
         }
 
         
-        // private void InstallVfxs()
-        // {
-        //     Container.BindFactory<ParticleView.Args, ParticleView, ParticleView.Factory>()
-        //         .FromPoolableMemoryPool<ParticleView.Args, ParticleView, ParticleView.Pool>(poolbinder =>
-        //             poolbinder
-        //                 .WithInitialSize(20)
-        //                 .FromComponentInNewPrefab(_prefabSettings.particleView)
-        //                 .UnderTransformGroup("Vfxs"));
-        //     
-        // }
+        private void InstallProducts()
+        {
+            Container.BindFactory<BlockView.Args, BlockView, BlockView.Factory>()
+                .FromPoolableMemoryPool<BlockView.Args, BlockView, BlockView.Pool>(poolbinder =>
+                    poolbinder
+                        .WithInitialSize(20)
+                        .FromComponentInNewPrefab(_prefabSettings.blockView)
+                        .UnderTransformGroup("Blockes"));
+            
+        }
     }
 }
