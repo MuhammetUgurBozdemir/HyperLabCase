@@ -7,6 +7,7 @@ using Game.Scripts.Grid;
 using Game.Scripts.Settings;
 using UnityEngine;
 using Zenject;
+using Random = UnityEngine.Random;
 
 namespace Game.Scripts.Controllers
 {
@@ -19,6 +20,7 @@ namespace Game.Scripts.Controllers
         private LevelData _levelData;
 
         public bool isMoving = false;
+
         readonly Vector2[] _neighborOffsets = new Vector2[]
         {
             new Vector2(1, 0),
@@ -62,43 +64,48 @@ namespace Game.Scripts.Controllers
 
         public void CheckGridsForMatchedColor(GridView view, Color color)
         {
-            if(isMoving) return;
-            
+            if (isMoving) return;
+
             _counter = 0;
-            
+
             foreach (var offset in _neighborOffsets)
             {
                 Vector2 neighborPos = view.pos + offset;
 
                 if (!_gridDictionary.TryGetValue(neighborPos, out GridView neighborGrid)) continue;
 
-                if (neighborGrid.BlockViews.Count <= 0) continue;
-                
+                if (neighborGrid.BlockViews.Count > 0)
+                {
+                    _counter++;
+                }
                 view.BlockViews.AddRange(neighborGrid.BlockViews);
-                _counter++;
             }
 
-            if(_counter==0) return;
-            
+            if (_counter == 0) return;
+
             view.StartCoroutineFromController();
         }
 
-        public void CheckIsTargetReached(int amount,Color color)
-        { 
+        public void CheckIsTargetReached(int amount, Color color)
+        {
             _levelData.Targets.Find(clr => clr.Color == color).target -= amount;
+
+            Debug.Log(_levelData.Targets.Find(clr => clr.Color == color).target);
 
             bool isCompleted = _levelData.Targets.Any(cnt => cnt.target > 0);
 
-            if (!isCompleted) return;
-            
+            if (isCompleted) return;
+
             currentLevel++;
+
             if (currentLevel >= _levelSettings.levels.Count())
             {
                 currentLevel = 0;
             }
-                
+
             ClearLevel();
         }
+
         public void SpawnNewBlock()
         {
             var counter = 0;
@@ -131,35 +138,43 @@ namespace Game.Scripts.Controllers
             {
                 tempGridView = _gridDictionary[Vector2.zero];
             }
-            
-            
-            
+
+            List<Color> listColor = new List<Color>();
+
+            foreach (var target in _levelData.Targets)
+            {
+                for (int i = 0; i < target.target; i++)
+                {
+                    listColor.Add(target.Color);
+                }
+            }
+
             GridData levelGrid = new GridData
             {
-                blockColor = default,
+                blockColor = listColor[Random.Range(0, listColor.Count)],
                 blockAmount = _counter,
                 pos = tempGridView.pos
             };
 
-            tempGridView.Init(levelGrid,true);
-            
+            tempGridView.Init(levelGrid, true);
+
             _counter = 0;
         }
 
         public void ClearLevel()
         {
             foreach (var keyValuePair in _gridDictionary)
-            { 
+            {
                 keyValuePair.Value.Dispose();
             }
-            
+
             _gridDictionary.Clear();
-            
+
             InitLevel(currentLevel);
         }
+
         public void Dispose()
         {
-            
         }
     }
 }
