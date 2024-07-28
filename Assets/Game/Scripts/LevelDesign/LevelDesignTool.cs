@@ -13,7 +13,9 @@ namespace Game.Scripts.LevelDesign
 {
     public class LevelDesignTool : MonoBehaviour
     {
+        public int MoveCount;
         public List<Target> Targets;
+        
 
         [OnValueChanged("CreateGrids")] public int length;
 
@@ -63,21 +65,14 @@ namespace Game.Scripts.LevelDesign
                 data.Targets.Add(target);
             }
 
-            string fileName =
-                "Level" + (Directory.GetFiles(Application.dataPath + "/Game/Levels/", "*.json").Length + 1);
+            data.moveCount = MoveCount;
+
+            string fileName = "Level" + (Directory.GetFiles(Application.dataPath + "/Game/Levels/", "*.json").Length + 1);
 
             string levelJson = JsonUtility.ToJson(data);
             File.WriteAllText(Application.dataPath + "/Game/Levels/" + fileName + ".json", levelJson);
         }
 
-        // [Button]
-        // public void LoadLevel()
-        // {
-        //     string json = File.ReadAllText(Application.dataPath + "/Game/Levels/level1.json");
-        //     LevelData data = JsonUtility.FromJson<LevelData>(json);
-        //
-        //     loadedGrids = data.levelGrids;
-        // }
 
         [Button]
         private void ClearLevel()
@@ -92,6 +87,7 @@ public class LevelData
 {
     public List<GridData> levelGrids = new List<GridData>();
     public List<Target> Targets=new List<Target>();
+    public int moveCount;
 }
 
 [Serializable]

@@ -29,7 +29,7 @@ namespace Game.Scripts.Grid
             _levelController = levelController;
         }
 
-        public void Init(GridData data)
+        public void Init(GridData data , bool isSpawned=false)
         {
             _data = data;
             transform.position = new Vector3(_data.pos.x, 0, _data.pos.y);
@@ -40,9 +40,21 @@ namespace Game.Scripts.Grid
             {
                 BlockView view = _diContainer.InstantiatePrefabForComponent<BlockView>(_prefabSettings.blockView);
                 view.transform.SetParent(transform);
-                view.transform.position = new Vector3(_data.pos.x, .15f * (i + 1), data.pos.y);
                 BlockViews.Add(view);
                 view.ApplyColor(data);
+                
+                Vector3 newPosition = new Vector3(_data.pos.x, .15f * (i + 1), data.pos.y);
+
+                if (isSpawned)
+                {
+                    newPosition.y += 10;
+                    view.transform.position = newPosition;
+                    view.transform.DOMove(new Vector3(_data.pos.x, .15f * (i + 1)), 0.5f);
+                }
+                else
+                {
+                    view.transform.position = newPosition;
+                }
             }
         }
 
@@ -113,6 +125,11 @@ namespace Game.Scripts.Grid
         public void OnClick()
         {
             _levelController.CheckGridsForMatchedColor(this, _data.blockColor);
+        }
+
+        public void Dispose()
+        {
+            Destroy(gameObject);
         }
     }
 }

@@ -15,6 +15,8 @@ namespace Game.Scripts.Controllers
         private readonly Dictionary<Vector2, GridView> _gridDictionary = new Dictionary<Vector2, GridView>();
         private int _gridCounter;
         private int _counter;
+        private int currentLevel;
+        private LevelData _levelData;
 
         readonly Vector2[] _neighborOffsets = new Vector2[]
         {
@@ -39,11 +41,17 @@ namespace Game.Scripts.Controllers
 
         public void Initialize()
         {
-            string json = _levelSettings.levels[0].text;
+            InitLevel(0);
+        }
+
+        private void InitLevel(int index)
+        {
+            string json = _levelSettings.levels[index].text;
 
             LevelData data = JsonUtility.FromJson<LevelData>(json);
+            _levelData = data;
 
-            foreach (GridData dataLevelGrid in data.levelGrids)
+            foreach (GridData dataLevelGrid in _levelData.levelGrids)
             {
                 GridView view = _diContainer.InstantiatePrefabForComponent<GridView>(_prefabSettings.gridView);
                 view.Init(dataLevelGrid);
@@ -70,6 +78,22 @@ namespace Game.Scripts.Controllers
             view.StartCoroutineFromController();
         }
 
+        public void CheckIsTargetReached(int amount,Color color)
+        { 
+            _levelData.Targets.Find(clr => clr.Color == color).target -= amount;
+
+            bool isCompleted = _levelData.Targets.Any(cnt => cnt.target > 0);
+
+            if (!isCompleted) return;
+            
+            currentLevel++;
+            if (currentLevel >= _levelSettings.levels.Count())
+            {
+                currentLevel = 0;
+            }
+                
+            ClearLevel();
+        }
         public void SpawnNewBlock()
         {
             var counter = 0;
@@ -103,6 +127,8 @@ namespace Game.Scripts.Controllers
                 tempGridView = _gridDictionary[Vector2.zero];
             }
             
+            
+            
             GridData levelGrid = new GridData
             {
                 blockColor = default,
@@ -110,13 +136,25 @@ namespace Game.Scripts.Controllers
                 pos = tempGridView.pos
             };
 
-            tempGridView.Init(levelGrid);
+            tempGridView.Init(levelGrid,true);
             
             _counter = 0;
         }
 
+        public void ClearLevel()
+        {
+            foreach (var keyValuePair in _gridDictionary)
+            { 
+                keyValuePair.Value.Dispose();
+            }
+            
+            _gridDictionary.Clear();
+            
+            InitLevel(currentLevel);
+        }
         public void Dispose()
         {
+            
         }
     }
 }
