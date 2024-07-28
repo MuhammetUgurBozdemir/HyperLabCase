@@ -35,7 +35,10 @@ namespace Game.Scripts.LevelDesign
             {
                 var obj = Instantiate(prefab, new Vector3(transform.position.x, _yPos, transform.position.z),
                     Quaternion.Euler(90, 0, 0), this.transform);
-                obj.GetComponent<BlockView>().ApplyColor(color);
+                obj.GetComponent<BlockView>().ApplyColor(new GridData
+                {
+                    blockColor = color
+                });
                 objects.Add(obj.GetComponent<BlockView>());
                 _yPos += .15f;
             }

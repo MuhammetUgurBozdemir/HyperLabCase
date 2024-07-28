@@ -51,7 +51,7 @@ namespace Game.Scripts.LevelDesign
                 {
                     blockAmount = levelDesignGrid.objects.Count,
                     blockColor = levelDesignGrid.color,
-                    pos = levelDesignGrid.transform.position
+                    pos = new Vector2(levelDesignGrid.transform.position.x,levelDesignGrid.transform.position.z)
                 };
                 data.levelGrids.Add(grid);
             }
@@ -91,5 +91,5 @@ public class GridData
 {
     public Color blockColor;
     public int blockAmount;
-    public Vector3 pos;
+    public Vector2 pos;
 }
