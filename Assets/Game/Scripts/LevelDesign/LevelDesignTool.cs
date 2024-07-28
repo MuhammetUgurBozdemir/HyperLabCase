@@ -13,6 +13,8 @@ namespace Game.Scripts.LevelDesign
 {
     public class LevelDesignTool : MonoBehaviour
     {
+        public List<Target> Targets;
+
         [OnValueChanged("CreateGrids")] public int length;
 
         [SerializeField] private Transform prefab;
@@ -51,14 +53,19 @@ namespace Game.Scripts.LevelDesign
                 {
                     blockAmount = levelDesignGrid.objects.Count,
                     blockColor = levelDesignGrid.color,
-                    pos = new Vector2(levelDesignGrid.transform.position.x,levelDesignGrid.transform.position.z)
+                    pos = new Vector2(levelDesignGrid.transform.position.x, levelDesignGrid.transform.position.z)
                 };
                 data.levelGrids.Add(grid);
             }
 
+            foreach (Target target in Targets)
+            {
+                data.Targets.Add(target);
+            }
 
-            string fileName = "Level" + (Directory.GetFiles(Application.dataPath + "/Game/Levels/", "*.json").Length+1);
-            
+            string fileName =
+                "Level" + (Directory.GetFiles(Application.dataPath + "/Game/Levels/", "*.json").Length + 1);
+
             string levelJson = JsonUtility.ToJson(data);
             File.WriteAllText(Application.dataPath + "/Game/Levels/" + fileName + ".json", levelJson);
         }
@@ -84,6 +91,7 @@ namespace Game.Scripts.LevelDesign
 public class LevelData
 {
     public List<GridData> levelGrids = new List<GridData>();
+    public List<Target> Targets=new List<Target>();
 }
 
 [Serializable]
@@ -92,4 +100,11 @@ public class GridData
     public Color blockColor;
     public int blockAmount;
     public Vector2 pos;
+}
+
+[Serializable]
+public class Target
+{
+    public int target;
+    public Color Color;
 }

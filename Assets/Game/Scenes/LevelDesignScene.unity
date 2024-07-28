@@ -1774,6 +1774,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 56d2af9c5e0574e0c85cb0b6edbe4298, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Targets:
+  - target: 10
+    Color: {r: 1, g: 0, b: 0, a: 0}
+  - target: 5
+    Color: {r: 0, g: 0, b: 0, a: 0}
   length: 3
   prefab: {fileID: 1034565261116122441, guid: 70c2d4c390557474db288f4d94f21200, type: 3}
   levelDesignGrids:
