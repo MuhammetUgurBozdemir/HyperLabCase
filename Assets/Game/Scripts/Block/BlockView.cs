@@ -32,15 +32,21 @@ namespace Game.Scripts.Block
 
         public void OnDespawned()
         {
+            var particle = particleSystem.transform;
             particleSystem.gameObject.SetActive(true);
             particleSystem.transform.SetParent(null);
-            transform.DOScale(Vector3.zero, .1f);
+            transform.DOScale(Vector3.zero, .1f).OnComplete(() =>
+            {
+                particle.transform.DOScale(new Vector3(.15f,.15f,.15f), 0);
+                particle.transform.SetParent(transform);
+            });
         }
 
         public void OnSpawned(Args args, IMemoryPool p2)
         {
             ApplyColor(args.Data, args.List);
             _pool = p2;
+            transform.DOScale(Vector3.one, 0);
         }
 
         public void DespawnView()

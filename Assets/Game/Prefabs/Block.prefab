@@ -48,6 +48,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   renderer: {fileID: 684476859180307531}
   particleSystem: {fileID: 9089801097341537846}
+  parentList: []
   data:
     blockColor: {r: 0, g: 0, b: 0, a: 0}
     blockAmount: 0
@@ -198,7 +199,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 19827778, guid: ec1c5863f61e8ff4a84dbdb8a282a7ac, type: 3}
       propertyPath: stopAction
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:

@@ -4,6 +4,7 @@ using System.Linq;
 using DG.Tweening;
 using Game.Scripts.Block;
 using Game.Scripts.Controllers;
+using Game.Scripts.Screen;
 using Game.Scripts.Settings;
 using UnityEngine;
 using Zenject;
@@ -16,20 +17,24 @@ namespace Game.Scripts.Grid
         public Vector2 pos;
         public List<BlockView> BlockViews;
 
+        public float tempYPos;
 
         private DiContainer _diContainer;
         private PrefabSettings _prefabSettings;
         private LevelController _levelController;
         private BlockView.Factory _factory;
+        private GameScreenView _gameScreenView;
 
         [Inject]
         private void Construct(DiContainer diContainer, PrefabSettings prefabSettings, LevelController levelController,
-            BlockView.Factory factory)
+            BlockView.Factory factory,
+            [Inject(Id = "GameScreenView")] GameScreenView gameScreenView)
         {
             _diContainer = diContainer;
             _prefabSettings = prefabSettings;
             _levelController = levelController;
             _factory = factory;
+            _gameScreenView = gameScreenView;
         }
 
         public void Init(GridData data, bool isSpawned = false)
@@ -39,6 +44,8 @@ namespace Game.Scripts.Grid
 
             pos = _data.pos;
 
+            tempYPos = BlockViews.Count * .15f;
+            
             for (int i = 0; i < data.blockAmount; i++)
             {
                 BlockView view = _factory.Create(new BlockView.Args(data, BlockViews));
@@ -53,7 +60,9 @@ namespace Game.Scripts.Grid
                 {
                     newPosition.y += 10;
                     view.transform.position = newPosition;
-                    view.transform.DOMove(new Vector3(_data.pos.x, .15f * (i + 1),_data.pos.y), 0.5f).SetEase(Ease.InSine);
+                    view.transform
+                        .DOMove(new Vector3(_data.pos.x, tempYPos+.15f * (i + 1), _data.pos.y), 0.5f)
+                        .SetEase(Ease.InSine);
                 }
                 else
                 {
@@ -113,12 +122,12 @@ namespace Game.Scripts.Grid
 
             var largeGroups = views.Where(x => x.Count() > 4).SelectMany(x => x)
                 .OrderByDescending(x => x.transform.position.y).ToList();
-            
+
             if (largeGroups.Any())
             {
                 _levelController.CheckIsTargetReached(largeGroups.Count, largeGroups[0].data.blockColor);
             }
-            
+
             if (largeGroups.Count > 0)
             {
                 _levelController.SpawnNewBlock();
@@ -128,11 +137,11 @@ namespace Game.Scripts.Grid
             {
                 BlockViews.Remove(blockView);
                 blockView.DespawnView();
+                _gameScreenView.UpdateCounter();
                 yield return new WaitForSeconds(.1f);
             }
-            _levelController.isMoving = false;
 
-         
+            _levelController.isMoving = false;
         }
 
         private IOrderedEnumerable<IGrouping<Color, BlockView>> GroupAndSortColorObjects(List<BlockView> matchedObjects)

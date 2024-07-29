@@ -15,7 +15,7 @@ namespace Game.Scripts.LevelDesign
     {
         public int MoveCount;
         public List<Target> Targets;
-        
+
 
         [OnValueChanged("CreateGrids")] public int length;
 
@@ -66,8 +66,10 @@ namespace Game.Scripts.LevelDesign
             }
 
             data.moveCount = MoveCount;
+            data.length = length;
 
-            string fileName = "Level" + (Directory.GetFiles(Application.dataPath + "/Game/Levels/", "*.json").Length + 1);
+            string fileName =
+                "Level" + (Directory.GetFiles(Application.dataPath + "/Game/Levels/", "*.json").Length + 1);
 
             string levelJson = JsonUtility.ToJson(data);
             File.WriteAllText(Application.dataPath + "/Game/Levels/" + fileName + ".json", levelJson);
@@ -86,8 +88,9 @@ namespace Game.Scripts.LevelDesign
 public class LevelData
 {
     public List<GridData> levelGrids = new List<GridData>();
-    public List<Target> Targets=new List<Target>();
+    public List<Target> Targets = new List<Target>();
     public int moveCount;
+    public int length;
 }
 
 [Serializable]

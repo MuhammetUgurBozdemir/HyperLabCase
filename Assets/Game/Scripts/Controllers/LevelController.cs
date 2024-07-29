@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using Game.Scripts.Block;
 using Game.Scripts.Grid;
+using Game.Scripts.Screen;
 using Game.Scripts.Settings;
 using UnityEngine;
 using Zenject;
@@ -13,11 +14,11 @@ namespace Game.Scripts.Controllers
 {
     public class LevelController : IInitializable, IDisposable
     {
-        private readonly Dictionary<Vector2, GridView> _gridDictionary = new Dictionary<Vector2, GridView>();
+        public readonly Dictionary<Vector2, GridView> _gridDictionary = new Dictionary<Vector2, GridView>();
         private int _gridCounter;
         private int _counter;
         private int currentLevel;
-        private LevelData _levelData;
+        public LevelData _levelData;
 
         public bool isMoving = false;
 
@@ -32,14 +33,17 @@ namespace Game.Scripts.Controllers
         private LevelSettings _levelSettings;
         private DiContainer _diContainer;
         private PrefabSettings _prefabSettings;
+        private GameScreenView _gameScreenView;
 
         [Inject]
         private void Construct(LevelSettings levelSettings, DiContainer diContainer,
-            PrefabSettings prefabSettings)
+            PrefabSettings prefabSettings,
+            [Inject(Id = "GameScreenView")] GameScreenView gameScreenView)
         {
             _levelSettings = levelSettings;
             _prefabSettings = prefabSettings;
             _diContainer = diContainer;
+            _gameScreenView = gameScreenView;
         }
 
         public void Initialize()
@@ -60,11 +64,22 @@ namespace Game.Scripts.Controllers
                 view.Init(dataLevelGrid);
                 _gridDictionary.Add(view.pos, view);
             }
+            
+            _gameScreenView.Init();
         }
 
         public void CheckGridsForMatchedColor(GridView view, Color color)
         {
             if (isMoving) return;
+            
+            _levelData.moveCount--;
+            _gameScreenView.UpdateMoveCount();
+            
+            if (_levelData.moveCount==0)
+            {
+                _gameScreenView.LevelCompleted();
+                
+            }
 
             _counter = 0;
 
@@ -78,6 +93,7 @@ namespace Game.Scripts.Controllers
                 {
                     _counter++;
                 }
+
                 view.BlockViews.AddRange(neighborGrid.BlockViews);
             }
 
@@ -88,26 +104,32 @@ namespace Game.Scripts.Controllers
 
         public void CheckIsTargetReached(int amount, Color color)
         {
-            _levelData.Targets.Find(clr => clr.Color == color).target -= amount;
+            var target = _levelData.Targets.Find(clr => clr.Color == color);
 
-            Debug.Log(_levelData.Targets.Find(clr => clr.Color == color).target);
+            target.target -= amount;
+
+            _gameScreenView.UpdateTargets(target.target, _levelData.Targets.IndexOf(target));
 
             bool isCompleted = _levelData.Targets.Any(cnt => cnt.target > 0);
 
             if (isCompleted) return;
 
+            _gameScreenView.LevelCompleted();
+            
             currentLevel++;
 
             if (currentLevel >= _levelSettings.levels.Count())
             {
                 currentLevel = 0;
             }
-
-            ClearLevel();
         }
+
+     
 
         public void SpawnNewBlock()
         {
+            if(!_levelData.Targets.Any(x=>x.target>0)) return;
+            
             var counter = 0;
             GridView tempGridView = null;
 
@@ -119,7 +141,7 @@ namespace Game.Scripts.Controllers
 
                     if (!_gridDictionary.TryGetValue(neighborPos, out GridView neighborGrid)) continue;
 
-                    if (gridView.Value.BlockViews.Count == 0)
+                    if (neighborGrid.BlockViews.Count == 0 && gridView.Value.BlockViews.Count==0)
                     {
                         counter++;
                     }
@@ -151,7 +173,7 @@ namespace Game.Scripts.Controllers
 
             GridData levelGrid = new GridData
             {
-                blockColor = listColor[Random.Range(0, listColor.Count)],
+                blockColor = listColor[Random.Range(0, listColor.Count-1)],
                 blockAmount = _counter,
                 pos = tempGridView.pos
             };

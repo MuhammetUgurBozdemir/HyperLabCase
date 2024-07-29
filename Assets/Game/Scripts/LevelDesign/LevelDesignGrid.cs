@@ -9,8 +9,7 @@ namespace Game.Scripts.LevelDesign
 {
     public class LevelDesignGrid : MonoBehaviour
     {
-        [OnValueChanged("CreateObjects")] 
-        public Color32 color;
+        [OnValueChanged("CreateObjects")] public Color32 color;
 
         [OnValueChanged("CreateObjects")] [SerializeField]
         private int objectAmount;
@@ -38,7 +37,7 @@ namespace Game.Scripts.LevelDesign
                 obj.GetComponent<BlockView>().ApplyColor(new GridData
                 {
                     blockColor = color
-                },new List<BlockView>());
+                }, new List<BlockView>());
                 objects.Add(obj.GetComponent<BlockView>());
                 _yPos += .15f;
             }
